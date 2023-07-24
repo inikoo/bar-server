@@ -1,0 +1,103 @@
+{
+    "slug": "banner",
+    "name": "Banner",
+    "blueprint": {
+        "delay": 5000,
+        "common": {
+            "corners": {
+                "bottomLeft": {
+                    "type": "slideControls"
+                }
+            },
+            "centralStage": {
+                "title": null,
+                "subtitle": null,
+                "text": null
+            }
+        },
+        "slides": [
+            {
+                "id": 1,
+                "visibility": true,
+                "imageSrc": "/../../../Oppenheimer.jpg",
+                "imageAlt": "Front of men's Basic Tee in sienna",
+                "link": null,
+                "corners": {
+                    "bottomRight": {
+                        "type": "linkButton",
+                        "data": {
+                            "label": "Browse Promo",
+                            "target": "#"
+                        }
+                    }
+                },
+                "centralStage": {
+                    "title": "Welcome to the jungle",
+                    "subtitle": "Jungle is the best place to go and healing with your family"
+                }
+            },
+            {
+                "id": 2,
+                "visibility": true,
+                "imageSrc": "/../../../Car1.jpg",
+                "imageAlt": "Lorem ipsum dolor sit amet consectetur.",
+                "corners": {
+                    "topLeft": {
+                        "type": "cornerText",
+                        "data": {
+                            "title": "Welcome to the jungle",
+                            "subtitle": "Jungle is the best place to go and healing with your family"
+                        }
+                    },
+                    "topRight": {
+                        "type": "footer",
+                        "data": {
+                            "label": "The banner officially disclaimed by XYZ Company."
+                        }
+                    }
+                }
+            },
+            {
+                "id": 3,
+                "visibility": true,
+                "imageSrc": "/../../../Beach.jpg",
+                "imageAlt": "Lorem ipsum dolor Basic Tee in sienna",
+                "corners": {
+                    "bottomRight": {
+                        "type": "linkButton",
+                        "data": {
+                            "label": "Browse Promo",
+                            "target": "#"
+                        }
+                    }
+                },
+                "centralStage": {
+                    "title": "Welcome to the jungle",
+                    "subtitle": "Jungle is the best place to go and healing with your family"
+                }
+            },
+            {
+                "id": 4,
+                "visibility": false,
+                "imageSrc": "/../../../Car2.jpg",
+                "imageAlt": "Continuous infinite slider",
+                "link": "google.com",
+                "corners": {
+                    "topRight": {
+                        "type": "text",
+                        "data": {
+                            "label": "Hello"
+                        }
+                    }
+                }
+            }
+        ]
+    },
+    "scope": "webpage",
+    "webBlocks": [
+        {
+            "code": "Banner",
+            "name": "Main Banner"
+        }
+    ]
+}

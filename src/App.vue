@@ -1,30 +1,134 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-</script>
+<!--
+  - Author: Raul Perusquia <raul@inikoo.com>
+  - Created: Sun, 23 Jul 2023 22:01:23 Malaysia Time, Kuala Lumpur, Malaysia
+  - Copyright (c) 2023, Raul A Perusquia Flores
+  -->
 
+<script setup lang="ts">
+import { ref } from 'vue'
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { Autoplay, Pagination, Navigation } from 'swiper/modules'
+
+import data from '@/../database/seeders/datasets/web-block-types/banner.json'
+
+import 'swiper/css'
+import 'swiper/css/navigation';
+import SlideCorner from "@/Components/Slider/SlideCorner.vue";
+import CentralStage from "@/Components/Slider/CentralStage.vue";
+console.log(data)
+
+const props = defineProps<{
+    layout: {
+
+        delay: number,
+        common: {
+            corners: {
+                topLeft?: object,
+                topRight?: object,
+                bottomLeft?: object,
+                bottomRight?: object
+            }
+
+        },
+        link?: string,
+        slides: Array<
+            {
+                id: string,
+                imageSrc: string
+                imageAlt: string,
+                link?: string,
+                corners: {
+                    topLeft?: {
+                        type: string,
+                        data?: object
+                    },
+                    topRight?: object,
+                    bottomLeft?: object,
+                    bottomRight?: object
+                }
+                centralStage: {
+                    title?: string
+                    subtitle?: string
+                    text?: string,
+                    footer?: string
+                }
+
+            }
+        >,
+
+    }
+
+}>()
+
+const generateThumbnail = (set) => {
+    if (set.imageSrc && set.imageSrc instanceof File) {
+        let fileSrc = URL.createObjectURL(set.imageSrc);
+        setTimeout(() => {
+            URL.revokeObjectURL(fileSrc);
+        }, 1000);
+        return fileSrc;
+    } else {
+        return getImageUrl(set.imageSrc);
+    }
+};
+
+const getImageUrl = (name: string) => {
+    return new URL(`@/../../../art/banner/` + name, import.meta.url).href
+}
+
+const swiperRef = ref()
+
+
+const filteredNulls = (corners) => {
+    return Object.fromEntries(Object.entries(corners).filter(([_, v]) => v != null));
+};
+
+
+</script>
+  
 <template>
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div>
-  <HelloWorld msg="Vite + Vue" />
+    <div class="w-full aspect-[16/4] overflow-hidden relative bg-gray-100">
+        <Swiper ref="swiperRef" :spaceBetween="-1" :slidesPerView="1" :centeredSlides="true" :loop="true"
+            :autoplay="{
+                delay: data.blueprint.delay,
+                disableOnInteraction: false,
+            }"
+            :pagination="{
+                clickable: true,
+            }"
+            :navigation="false" :modules="[Autoplay, Pagination, Navigation]" class="mySwiper bg-gray-200">
+            <SwiperSlide v-for="slide in data.blueprint.slides" :key="slide.id">
+                <img :src="generateThumbnail(slide)" :alt="slide.imageAlt">
+                <!-- <FontAwesomeIcon v-if="slide.link" icon='far fa-external-link'
+                    class='text-gray-300/50 text-xl absolute top-2 right-2' aria-hidden='true' />
+                <Link v-if="slide.link" :href="slide.link" class="absolute bg-transparent w-full h-full" />
+                <SlideCorner v-for="(corner, position) in filteredNulls(slide.corners)" :position="position"
+                    :corner="corner" />
+                <CentralStage v-if="slide.centralStage" :data="slide.centralStage" /> -->
+            </SwiperSlide>
+        </Swiper>
+        <!-- <SlideCorner class="z-50" v-for="(corner, position) in filteredNulls(data.blueprint.common.corners)" :position="position"
+            :corner="corner" :swiperRef="swiperRef" /> -->
+    </div>
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+<style lang="scss">
+.swiper {
+    @apply w-full h-full;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+
+.swiper-slide {
+    @apply bg-gray-200;
+    text-align: center;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+
+.swiper-slide img {
+    @apply w-full h-full;
+    display: block;
+    object-fit: cover;
 }
 </style>
