@@ -8,110 +8,142 @@
 import { ref } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Autoplay, Pagination, Navigation } from 'swiper/modules'
-
-import data from '@/../database/seeders/datasets/web-block-types/banner.json'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { faEyeSlash } from '@/../private/pro-solid-svg-icons'
+import { get } from 'lodash'
+import { faExternalLink, faExclamationTriangle } from '@/../private/pro-regular-svg-icons'
+import { library } from '@fortawesome/fontawesome-svg-core'
+library.add(faExternalLink, faEyeSlash, faExclamationTriangle)
 
 import 'swiper/css'
 import 'swiper/css/navigation';
 import SlideCorner from "@/Components/Slider/SlideCorner.vue";
+import Image from "@/Components/Image.vue";
 import CentralStage from "@/Components/Slider/CentralStage.vue";
-console.log(data)
+import { Link } from '@inertiajs/vue3';
+import { watch } from 'vue'
+
+interface CornersPositionData {
+    data: {
+        text: string
+        target: string
+    }
+    type: string
+}
+
+interface Corners {
+    topLeft?: CornersPositionData
+    topRight?: CornersPositionData
+    bottomLeft?: CornersPositionData
+    bottomRight?: CornersPositionData
+}
 
 const props = defineProps<{
-    layout: {
-
-        delay: number,
+    jumpToIndex?: number
+    data: {
         common: {
-            corners: {
-                topLeft?: object,
-                topRight?: object,
-                bottomLeft?: object,
-                bottomRight?: object
+            centralStage: {
+                subtitle?: string
+                text?: string
+                title?: string
             }
-
-        },
-        link?: string,
-        slides: Array<
+            corners: Corners
+        }
+        components: Array<
             {
-                id: string,
-                imageSrc: string
-                imageAlt: string,
-                link?: string,
-                corners: {
-                    topLeft?: {
-                        type: string,
-                        data?: object
-                    },
-                    topRight?: object,
-                    bottomLeft?: object,
-                    bottomRight?: object
+                id: number,
+                image_id: number
+                image_source: string
+                layout: {
+                    link?: string,
+                    centralStage: {
+                        title?: string
+                        subtitle?: string
+                        // text?: string,
+                        // footer?: string
+                    }
                 }
-                centralStage: {
-                    title?: string
-                    subtitle?: string
-                    text?: string,
-                    footer?: string
-                }
-
+                visibility: boolean
+                corners: Corners
+                imageAlt: string
+                link: string
             }
-        >,
+        >
+        delay: number
 
     }
+    view?: string
 
 }>()
 
-const generateThumbnail = (set) => {
-    if (set.imageSrc && set.imageSrc instanceof File) {
-        let fileSrc = URL.createObjectURL(set.imageSrc);
-        setTimeout(() => {
-            URL.revokeObjectURL(fileSrc);
-        }, 1000);
-        return fileSrc;
-    } else {
-        return getImageUrl(set.imageSrc);
-    }
-};
-
-const getImageUrl = (name: string) => {
-    return new URL(`@/../../../art/banner/` + name, import.meta.url).href
-}
 
 const swiperRef = ref()
 
+const filteredNulls = (corners: Corners) => {
+    if (corners) {
+        return Object.fromEntries(Object.entries(corners).filter(([_, v]) => v != null));
+    }
 
-const filteredNulls = (corners) => {
-    return Object.fromEntries(Object.entries(corners).filter(([_, v]) => v != null));
-};
+    return ''
+}
 
+watch(() => props.jumpToIndex, (newVal) => {
+    swiperRef.value.$el.swiper.slideToLoop(newVal, 0, false)
+})
 
 </script>
   
 <template>
-    <div class="w-full aspect-[16/4] overflow-hidden relative bg-gray-100">
-        <Swiper ref="swiperRef" :spaceBetween="-1" :slidesPerView="1" :centeredSlides="true" :loop="true"
-            :autoplay="{
-                delay: data.blueprint.delay,
-                disableOnInteraction: false,
-            }"
-            :pagination="{
-                clickable: true,
-            }"
-            :navigation="false" :modules="[Autoplay, Pagination, Navigation]" class="mySwiper bg-gray-200">
-            <SwiperSlide v-for="slide in data.blueprint.slides" :key="slide.id">
-                <img :src="generateThumbnail(slide)" :alt="slide.imageAlt">
-                <!-- <FontAwesomeIcon v-if="slide.link" icon='far fa-external-link'
-                    class='text-gray-300/50 text-xl absolute top-2 right-2' aria-hidden='true' />
-                <Link v-if="slide.link" :href="slide.link" class="absolute bg-transparent w-full h-full" />
-                <SlideCorner v-for="(corner, position) in filteredNulls(slide.corners)" :position="position"
-                    :corner="corner" />
-                <CentralStage v-if="slide.centralStage" :data="slide.centralStage" /> -->
-            </SwiperSlide>
-        </Swiper>
-        <!-- <SlideCorner class="z-50" v-for="(corner, position) in filteredNulls(data.blueprint.common.corners)" :position="position"
-            :corner="corner" :swiperRef="swiperRef" /> -->
-    </div>
+      <div class=" overflow-hidden relative border border-gray-300 shadow-md"
+          :class="[$props.view
+              ? { 'aspect-[2/1] w-1/2' : $props.view == 'mobile',
+                  'aspect-[3/1] w-3/4' : $props.view == 'tablet',
+                  'aspect-[4/1] w-full' : $props.view == 'desktop'}
+              : 'w-full aspect-[2/1] md:aspect-[3/1] lg:aspect-[4/1]']"
+      >
+          <Swiper ref="swiperRef"
+              :slideToClickedSlide="true"
+              :spaceBetween="-1"
+              :slidesPerView="1"
+              :centeredSlides="true"
+              :loop="true"
+              :autoplay="{
+                  delay: data.delay,
+                  disableOnInteraction: false,
+              }"
+              :pagination="{
+                  clickable: true,
+              }"
+              :navigation="false"
+              :modules="[Autoplay, Pagination, Navigation]" class="mySwiper">
+              <SwiperSlide v-for="component in data.components" :key="component.id">
+                  <div class="relative w-full h-full overflow-hidden">
+                      <!-- <img :src="" :alt="component.layout?.imageAlt" class="absolute" :style="getImageStyle(component)"> -->
+                      <Image :src="component.image.source" alt="Wowsbar" />
+                  </div>
+                  <div v-if="get(component, ['visibility'], true) === false" class="absolute h-full w-full bg-gray-800/50 z-10 " />
+                  <div class="z-[11] absolute left-7 flex flex-col gap-y-2">
+                      <FontAwesomeIcon v-if="get(component, ['visibility'], true) === false" icon='fas fa-eye-slash' class=' text-orange-400 text-4xl' aria-hidden='true' />
+                      <span v-if="get(component, ['visibility'], true) === false" class="text-orange-400/60 text-sm italic select-none" aria-hidden='true'>
+                          <FontAwesomeIcon icon='far fa-exclamation-triangle' class='' aria-hidden='true' />
+                          Not visible
+                      </span>
+                  </div>
+                  <FontAwesomeIcon v-if="!!component?.layout?.link" icon='far fa-external-link' class='text-gray-300/50 text-xl absolute top-2 right-2' aria-hidden='true' />
+                  <Link v-if="!!component?.layout?.link" :href="component?.layout?.link" class="absolute bg-transparent w-full h-full" />
+                  <SlideCorner v-for="(slideCorner, position) in filteredNulls(component?.layout?.corners)" :position="position" :corner="slideCorner" :commonCorner="data.common.corners" />
+                  
+                  <!-- CentralStage: common.centralStage (prioritize) and layout.centralstage -->
+                  <CentralStage v-if="data.common?.centralStage?.title?.length > 0 || data.common?.centralStage?.subtitle?.length > 0" :data="data.common?.centralStage" />
+                  <CentralStage v-else="component?.layout?.centralStage" :data="component?.layout?.centralStage" />
+              </SwiperSlide>
+          </Swiper>
+  
+          <!-- Reserved Corner: Button Controls -->
+          <SlideCorner class="z-10" v-for="(corner, position) in filteredNulls(data.common.corners)" :position="position" :corner="corner"   :swiperRef="swiperRef"/>
+      </div>
 </template>
-
+  
 <style lang="scss">
 .swiper {
     @apply w-full h-full;
@@ -127,7 +159,7 @@ const filteredNulls = (corners) => {
 }
 
 .swiper-slide img {
-    @apply w-full h-full;
+    @apply w-full h-auto;
     display: block;
     object-fit: cover;
 }
